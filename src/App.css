@@ -1,0 +1,19 @@
+.parent {
+  padding: 16px;
+}
+
+.child-wrapper {
+  display: flex;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.child {
+  flex-grow: 1;
+  border: 1px solid black;
+  border-radius: 6px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
