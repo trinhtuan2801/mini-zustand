@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import './App.css';
-import { useCount } from './hooks/useCount';
+import { getSyncCount, useCount } from './hooks/useCount';
 
 function App() {
   const [show, setShow] = useState(false);
@@ -34,7 +34,14 @@ const Child = ({ amount }: ChildProps) => {
         <b>Active Index: </b>
         {count}
       </div>
-      <button onClick={() => setCount(count + amount)}>
+      <button
+        onClick={() => {
+          setCount(count + amount);
+
+          console.log('react state', count);
+          console.log('sync state', getSyncCount().count);
+        }}
+      >
         {amount > 0 ? '+' : ''}
         {amount}
       </button>

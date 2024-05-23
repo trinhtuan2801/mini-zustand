@@ -1,13 +1,15 @@
-import createStore from "../createStore"
+import createStore from '../createStore';
 
-interface UseCount {
-  count: number
-  setCount: (count: number) => void
+interface CountStore {
+  count: number;
+  setCount: (count: number) => void;
 }
 
-export const useCount = createStore<UseCount>(set => ({
+const [useCount, getSyncCount] = createStore<CountStore>((set) => ({
   count: 0,
   setCount: (count: number) => {
-    set({ count })
-  }
-}))
+    set({ count });
+  },
+}));
+
+export { useCount, getSyncCount };
