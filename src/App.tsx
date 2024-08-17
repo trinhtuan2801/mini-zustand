@@ -7,32 +7,55 @@ function App() {
   return (
     <>
       <div className='parent'>
-        <button onClick={() => setShow(!show)}>Toggle</button>
-        <div className='child-wrapper'>
-          {show && (
-            <>
-              <Child amount={1} />
-              <Child amount={-1} />
-            </>
-          )}
-        </div>
+        <AddThreeBox />
+        <button onClick={() => setShow(!show)} style={{ alignSelf: 'start' }}>
+          Toggle Child
+        </button>
+        {show && (
+          <div className='child-wrapper'>
+            <CountBox amount={1} />
+            <CountBox amount={-1} />
+          </div>
+        )}
       </div>
     </>
   );
 }
 
-interface ChildProps {
+const AddThreeBox = () => {
+  const { count, addOne } = useCount();
+
+  return (
+    <div className='count-box'>
+      <div>
+        <span>Count: </span>
+        <b>{count}</b>
+      </div>
+      <button
+        onClick={() => {
+          addOne();
+          addOne();
+          addOne();
+        }}
+      >
+        +3
+      </button>
+    </div>
+  );
+};
+
+interface CountBoxProps {
   amount: number;
 }
 
-const Child = ({ amount }: ChildProps) => {
+const CountBox = ({ amount }: CountBoxProps) => {
   const { count, setCount } = useCount();
 
   return (
-    <div className='child'>
+    <div className='count-box'>
       <div>
-        <b>Active Index: </b>
-        {count}
+        <span>Count: </span>
+        <b>{count}</b>
       </div>
       <button
         onClick={() => {

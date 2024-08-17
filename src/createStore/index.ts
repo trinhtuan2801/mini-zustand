@@ -1,18 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useReducer } from 'react';
 
 type Subscriber<T> = (value: T) => void;
 
-const createSignal = <T extends object>(initValue: (() => T) | T) => {
-  let _value: T = typeof initValue === 'function' ? initValue() : initValue;
+const createSignal = <T extends object>(initValue: T) => {
+  let _value = initValue;
   const subscribers: Subscriber<T>[] = [];
 
   const notify = () => {
-    for (let subscriber of subscribers) {
+    for (const subscriber of subscribers) {
       subscriber(_value);
     }
   };
 
-  return {
+  const signal = {
     get value() {
       return _value;
     },
@@ -28,40 +28,45 @@ const createSignal = <T extends object>(initValue: (() => T) | T) => {
       };
     },
   };
+
+  return signal;
 };
 
-type StoreInitializer<S> = (set: SetStateAction<S>) => S;
+type InitStoreFn<S> = (set: SetStateFn<S>) => S;
 
-type SetStateAction<S> = (newState: Partial<S>) => void;
+type SetStateFn<S> = (newState: Partial<S> | ((prevState: S) => S)) => void;
 
 type Hook<S> = () => S;
 
 type SyncStateGetter<S> = () => S;
 
 export default function createStore<S extends object>(
-  storeInitializer: StoreInitializer<S>,
+  initStore: InitStoreFn<S>,
 ): [Hook<S>, SyncStateGetter<S>] {
-  const set: SetStateAction<S> = (newState) => {
-    signal.value = { ...signal.value, ...newState };
+  const setFunction: SetStateFn<S> = (newState) => {
+    if (typeof newState === 'function') signal.value = newState(signal.value);
+    else signal.value = { ...signal.value, ...newState };
   };
 
-  const signal = createSignal<S>(storeInitializer(set));
+  const store = initStore(setFunction);
 
-  const syncStateGetter: SyncStateGetter<S> = () => signal.value;
+  const signal = createSignal<S>(store);
 
   const hook: Hook<S> = () => {
-    const [storeState, setStoreState] = useState(signal.value);
+    const [_, forceRerender] = useReducer((x) => x + 1, 0);
 
     useEffect(() => {
-      const unsubscribe = signal.subscribe((newState) => {
-        setStoreState(newState);
+      const unsubscribe = signal.subscribe(() => {
+        forceRerender();
       });
 
       return () => unsubscribe();
     }, []);
 
-    return storeState;
+    return signal.value;
   };
+
+  const syncStateGetter: SyncStateGetter<S> = () => signal.value;
 
   return [hook, syncStateGetter];
 }
